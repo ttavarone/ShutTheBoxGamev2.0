@@ -63,13 +63,40 @@ public class ShutTheBox
      * Run after game is finished will be called almost last in the runSimulation class 
      * returns sets the points variable to the remaining numbers up
      */
-    public void points()
+    public void sumOfUnflipped()
     {
         for(int i=0; i<numUp.length; i++)
         {
             points+=numUp[i];
         }
     }
+    
+    /**
+     * This method tests which numbers are flipped down and adds it up to return
+     * a score
+     *
+     * @return an int representing the number of flipped down numbers
+     */
+    public int numFlippedDown()
+    {
+        // probably a for loop here to test for 0's
+        return -1;
+    }
+    
+    /**
+     * Takes all the numbers down and concats them to each other then returns
+     * the string representing this value
+     *
+     * @return a string representing the value that is all the numbers down
+     */
+    public String concatUnflipped()
+    {
+        // for loop that finds each number still up and concats it to the last num
+        //  does not include 0 obviously
+        return "";
+    }
+
+
 
     /**
      * Returns the value in the points variable
@@ -116,6 +143,45 @@ public class ShutTheBox
 
         return sumOfSubset(numUpIn, n-1, sum)||sumOfSubset(numUpIn, n-1, sum-numUpIn[n-1]);
 
+    }
+
+    
+    /** for both this and the following algorithm, they need to be able to choose
+    *   more than one number (possibly) OR if it cannot choose more than one number
+    *   than it needs to check when it is not possible for the algorithm to 
+    *   continue because the dice roll is too big to reach
+    */
+    /**
+     * A method that when run, instead of allowing user input, will try to choose
+     * the HIGHEST number possible to fulfill the dice roll requirements
+     *
+     * @return an int that represents the highest chosen number
+     */
+    public int chooseHigh()
+    {
+        int highest = 9;
+        for(int i = numUp.length-1; i >= 0; i--){
+            if(roll-numUp[i]==0){
+                if(numUp[i]>highest){highest = numUp[i];}
+            }
+        }
+        return highest;
+    }
+
+    /**
+     * A method that when run, instead of allowing user input, will try to choose
+     * the LOWEST number possible to fulfill the dice roll requirements
+     *
+     * @return an int that represents the lowest chosen number
+     */
+    public int chooseLow()
+    {
+        int lowest = 9;
+        for(int i = 0; i < numUp.length; i++){
+            //if(){}
+            if(numUp[i]!=0 && numUp[i]<lowest){lowest = numUp[i];}
+        }
+        return lowest;
     }
 
     /**
@@ -198,7 +264,7 @@ public class ShutTheBox
 
         }
         System.out.println("Game Over.");
-        points();
+        sumOfUnflipped();
         System.out.println("You scored "+getPoints());
     }
 }
