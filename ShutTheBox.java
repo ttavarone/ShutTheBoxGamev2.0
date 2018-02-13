@@ -5,29 +5,47 @@ import java.util.Scanner;
  * that is 'Shut The Box'
  *
  * @author (Tucker Tavarone)
- * @version (1/24/18)
+ * @version (2/9/18)
  */
 public class ShutTheBox
 {
-    private int[] numUp;
-    private int points=0, roll=0, errNum=0;
-    private boolean continueGame=true, numError=false;
+    private int[] numUpH, numUpL, numUpC;
+    private int pointsH, pointsL, roll, errNum, flippedDownH, flippedDownL;
+    private int pointsSumH, pointsSumL, flippedDownSumH, flippedDownSumL, concatNumSumH, concatNumSumL;
+    private boolean continueGame, numError, lowFound, highFound;
     private Random r = new Random();
+    private String concatNumH = new String();
+    private String concatNumL = new String();
 
     /**
      * Main constructor, initialises all the variables to default values
      */
     public ShutTheBox()
     {
-        numUp = new int[10]; //contains all the numbers that are still up and 0's for the ones that are down
+        numUpH = new int[10]; // contains all the numbers that are still up and 0's for the ones that are down
+        numUpL = new int[10];
+        numUpC = new int[10];
         for(int i=0; i<9; i++){ // initialises the numbers up as what is up
-            numUp[i] = i+1;
+            numUpH[i] = i+1;
+            numUpL[i] = i+1;
+            numUpC[i] = i+1;
         }
-        points = 0; // starts with nothing
+        pointsH = 0;
+        pointsL = 0;// starts with nothing
         roll = 0;
-        continueGame = true; // game will be initialised as being able to continue
+        flippedDownH = 0;
+        flippedDownL = 0;
         errNum = 0;
+        continueGame = true; // game will be initialised as being able to continue
         numError = false;
+        lowFound = false;
+        highFound = false;
+        pointsSumH =0;
+        pointsSumL = 0;
+        flippedDownSumH = 0;
+        flippedDownSumL = 0;
+        concatNumSumH = 0;
+        concatNumSumL = 0;
     }
 
     /**
@@ -36,12 +54,11 @@ public class ShutTheBox
      * 
      * @return int that contains the sum of rolling 'two' dice
      */
-    public double rollDice()
+    public void rollDice()
     {
         int max = 10;
         int min = 1;
         roll = min + r.nextInt(max);
-        return roll;
     }
 
     /**
@@ -50,11 +67,11 @@ public class ShutTheBox
      * 
      * It is only run in this class after numbers down, to update what is still up
      */
-    private void curNumUp(int numIn)
+    private void curNumUp(int numIn, int[] arrayIn)
     {
-        for(int i = 0; i<numUp.length-1; i++){
-            if(numUp[i]==numIn){
-                numUp[i]=0;
+        for(int i = 0; i<arrayIn.length-1; i++){
+            if(arrayIn[i]==numIn){
+                arrayIn[i]=0;
             }
         }
     }
@@ -65,47 +82,54 @@ public class ShutTheBox
      */
     public void sumOfUnflipped()
     {
-        for(int i=0; i<numUp.length; i++)
+        for(int i=0; i<numUpH.length; i++)
         {
-            points+=numUp[i];
+            pointsH+=numUpH[i];
+        }
+        for(int i=0; i<numUpL.length; i++)
+        {
+            pointsL+=numUpL[i];
         }
     }
-    
+
     /**
      * This method tests which numbers are flipped down and adds it up to return
      * a score
      *
-     * @return an int representing the number of flipped down numbers
      */
-    public int numFlippedDown()
+    public void numFlippedDown()
     {
-        // probably a for loop here to test for 0's
-        return -1;
+        for(int i = 0; i < numUpH.length; i++){
+            if(numUpH[i]==0){
+                int num = numUpC[i];
+                flippedDownH = flippedDownH+num;
+            }
+        }
+        for(int i = 0; i < numUpL.length; i++){
+            if(numUpL[i]==0){
+                int num = numUpC[i];
+                flippedDownL = flippedDownL+num;
+            }
+        }
     }
-    
+
     /**
      * Takes all the numbers down and concats them to each other then returns
      * the string representing this value
      *
-     * @return a string representing the value that is all the numbers down
      */
-    public String concatUnflipped()
+    public void concatUnflipped()
     {
-        // for loop that finds each number still up and concats it to the last num
-        //  does not include 0 obviously
-        return "";
-    }
-
-
-
-    /**
-     * Returns the value in the points variable
-     * 
-     * @param int that contains how many points were accumulated
-     */
-    public int getPoints()
-    {
-        return points;
+        for(int i = 0; i < numUpH.length; i++){
+            if(numUpH[i]!=0){
+                concatNumH = concatNumH+numUpH[i];
+            }
+        }
+        for(int i = 0; i < numUpL.length; i++){
+            if(numUpL[i]!=0){
+                concatNumL = concatNumL+numUpL[i];
+            }
+        }
     }
 
     /**
@@ -114,15 +138,15 @@ public class ShutTheBox
      * at the end of the loop in run simulation and the loop breaks if this decides game over
      * 
      */
-    public void possibilities()
+    public void possibilities(int[] arrayIn)
     {
         int anyUp = 0;
-        for(int i = 0; i<numUp.length; i++){
-            anyUp += numUp[i];
+        for(int i = 0; i<arrayIn.length; i++){
+            anyUp += arrayIn[i];
         }
         if(anyUp==0){continueGame=false;}
 
-        continueGame = sumOfSubset(numUp, numUp.length, roll);
+        continueGame = sumOfSubset(arrayIn, arrayIn.length, roll);
     }
 
     /**
@@ -145,27 +169,27 @@ public class ShutTheBox
 
     }
 
-    
     /** for both this and the following algorithm, they need to be able to choose
-    *   more than one number (possibly) OR if it cannot choose more than one number
-    *   than it needs to check when it is not possible for the algorithm to 
-    *   continue because the dice roll is too big to reach
-    */
+     *   more than one number (possibly) OR if it cannot choose more than one number
+     *   than it needs to check when it is not possible for the algorithm to 
+     *   continue because the dice roll is too big to reach
+     */
     /**
      * A method that when run, instead of allowing user input, will try to choose
      * the HIGHEST number possible to fulfill the dice roll requirements
      *
      * @return an int that represents the highest chosen number
      */
-    public int chooseHigh()
+    public void chooseHigh()
     {
         int highest = 9;
-        for(int i = numUp.length-1; i >= 0; i--){
-            if(roll-numUp[i]==0){
-                if(numUp[i]>highest){highest = numUp[i];}
+        for(int i = numUpH.length-1; i >= 0; i--){
+            if(numUpH[i] != 0 && roll-numUpH[i]==0){
+                highest = numUpH[i];
+                numUpH[i]=0;
+                break;
             }
         }
-        return highest;
     }
 
     /**
@@ -174,71 +198,59 @@ public class ShutTheBox
      *
      * @return an int that represents the lowest chosen number
      */
-    public int chooseLow()
+    public void chooseLow()
     {
-        int lowest = 9;
-        for(int i = 0; i < numUp.length; i++){
-            //if(){}
-            if(numUp[i]!=0 && numUp[i]<lowest){lowest = numUp[i];}
-        }
-        return lowest;
-    }
-
-    /**
-     * Method that ultimately tests the string that is input by the user and puts down the numbers
-     * corresponding to what the user selected. It also generates error messages if the user tries
-     * to put numbers down that have already been used.
-     * 
-     * @param s the string that contains what the scanner picked up for user input (it will be parsed
-     *        for ints via an array that contains char
-     * @return String that contains a message if it is applicable, otherwise the string is empty
-     *         and useless
-     */
-    public String checker(String s)
-    {
-        s.trim(); // clean up the string before sending to char array
-        char[] nums = s.toCharArray(); // make a char array so we can iterate through and parse nums
-        String msg = new String(); // outputs a msg regardless of input, see other msg
-        for(int i = 0; i<nums.length; i++){
-            int workingValue = nums[i];
-            int numberValue = Character.getNumericValue(workingValue);
-            if(workingValue==32)continue;
-            if(numberValue>0 && numberValue<10){
-                if(numUp[numberValue-1]==0){
-                    msg = new String("Cannot use that number, you lose."); //ends game
-                }
-                else{
-                    curNumUp(numberValue);
-                    numError = false;
-                    roll -= numberValue;
-                    if(roll>0){continue;}
-                    else if(roll==0){break;}
-                }
-            }
-            else{
-                //error message if user puts a number down that should not be put down
-                errNum = numberValue;
-                msg = new String(errNum+" is already down."); //new msg if there is an error
-                numError = true;
+        int lowest = 0;
+        for(int i = 0; i < numUpL.length; i++){
+            if(numUpL[i]!=0 && roll-numUpL[i]==0){
+                lowest = numUpL[i];
+                numUpL[i]=0;
                 break;
-
             }
         }
-        return msg;
     }
 
     /**
      * Prints out the numUp array so that the user can visualize it
      * 
      */
-    public void curNumString()
+    public void curNumString(int[] arrayIn)
     {
-        for(int i = 0; i<numUp.length-1; i++){
-            if(numUp[i]!=0){
-                System.out.print(numUp[i]+" ");
+        for(int i = 0; i<arrayIn.length-1; i++){
+            if(arrayIn[i]!=0){
+                System.out.print(arrayIn[i]+" ");
             }
         }
         System.out.println();
+    }
+
+    /**
+     * Method that sums up the values for each of the methods of scoring
+     *
+     * @param  y  a sample parameter for a method
+     * @return    the sum of x and y
+     */
+    public void sumOfEverything()
+    {
+        sumOfUnflipped();
+        numFlippedDown();
+        concatUnflipped();
+
+        int cctNH = Integer.parseInt(concatNumH);
+        int cctNL = Integer.parseInt(concatNumL);
+
+        pointsSumH += pointsH;
+        flippedDownSumH += flippedDownH;
+        concatNumSumH += cctNH;
+
+        pointsSumL += pointsL;
+        flippedDownSumL += flippedDownL;
+        concatNumSumL += cctNL;
+
+        //run each of the methods each time this is called to sum everything up
+        //may need some instance variables that represent the sums
+        //returns the values to the instance variables
+
     }
 
     /**
@@ -248,24 +260,29 @@ public class ShutTheBox
      */
     public void runSimulation()
     {
-        Scanner in = new Scanner(System.in);
-        while(continueGame){
-            System.out.println("Current Numbers Up ");
-            System.out.println("*****************");
-            curNumString();
-            System.out.println("*****************");
-            System.out.println("Your roll is: < "+rollDice()+" >");
-            continueGame = sumOfSubset(numUp, numUp.length, roll);
-            if(!continueGame){break;}
-            System.out.println("Enter your numbers");
-            String input = in.nextLine();
-            System.out.println(checker(input));
-            possibilities();
-
+        Scanner input = new Scanner(System.in);
+        System.out.print("How many simulations? ");
+        int simulations = input.nextInt();
+        for(int games = 0; games < simulations; games++){
+            while(continueGame){
+                // curNumString(numUpH);  (DEBUGGING)
+                rollDice();
+                possibilities(numUpH);
+                possibilities(numUpL);
+                chooseHigh();
+                chooseLow();
+                sumOfEverything();
+            }
         }
-        System.out.println("Game Over.");
-        sumOfUnflipped();
-        System.out.println("You scored "+getPoints());
+
+        System.out.println("Highest Choice");
+        System.out.println("Method 1"+pointsSumH);
+        System.out.println("Method 2 "+flippedDownH);
+        System.out.println("Method 3"+concatNumSumH);
+
+        System.out.println("Lowest Choice");
+        System.out.println("Method 1"+pointsSumL);
+        System.out.println("Method 2 "+flippedDownL);
+        System.out.println("Method 3"+concatNumSumL);
     }
 }
-
