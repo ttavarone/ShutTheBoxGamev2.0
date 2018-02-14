@@ -9,13 +9,13 @@ import java.util.Scanner;
  */
 public class ShutTheBox
 {
-    private int[] numUpH, numUpL, numUpC;
+    private int[] numUpH, numUpL;
     private int pointsH, pointsL, roll, errNum, flippedDownH, flippedDownL;
-    private int pointsSumH, pointsSumL, flippedDownSumH, flippedDownSumL, concatNumSumH, concatNumSumL;
+    private double pointsSumH, pointsSumL, flippedDownSumH, flippedDownSumL, concatNumSumH, concatNumSumL;
     private boolean continueGame, numError, lowFound, highFound;
     private Random r = new Random();
-    private String concatNumH = new String();
-    private String concatNumL = new String();
+    private double concatNumH;
+    private double concatNumL;
 
     /**
      * Main constructor, initialises all the variables to default values
@@ -24,11 +24,9 @@ public class ShutTheBox
     {
         numUpH = new int[10]; // contains all the numbers that are still up and 0's for the ones that are down
         numUpL = new int[10];
-        numUpC = new int[10];
         for(int i=0; i<9; i++){ // initialises the numbers up as what is up
             numUpH[i] = i+1;
             numUpL[i] = i+1;
-            numUpC[i] = i+1;
         }
         pointsH = 0;
         pointsL = 0;// starts with nothing
@@ -40,19 +38,20 @@ public class ShutTheBox
         numError = false;
         lowFound = false;
         highFound = false;
-        pointsSumH =0;
-        pointsSumL = 0;
-        flippedDownSumH = 0;
-        flippedDownSumL = 0;
-        concatNumSumH = 0;
-        concatNumSumL = 0;
+        pointsSumH =0.000;
+        pointsSumL = 0.000;
+        flippedDownSumH = 0.000;
+        flippedDownSumL = 0.000;
+        concatNumSumH = 0.000;
+        concatNumSumL = 0.000;
+        concatNumH = 0.000;
+        concatNumL = 0.000;
     }
 
     /**
      * A dice roll simulator, simulates rolling two dice and summing it up
      * so values can be anywhere from 1-9
      * 
-     * @return int that contains the sum of rolling 'two' dice
      */
     public void rollDice()
     {
@@ -101,13 +100,13 @@ public class ShutTheBox
     {
         for(int i = 0; i < numUpH.length; i++){
             if(numUpH[i]==0){
-                int num = numUpC[i];
+                int num = numUpH[i];
                 flippedDownH = flippedDownH+num;
             }
         }
         for(int i = 0; i < numUpL.length; i++){
             if(numUpL[i]==0){
-                int num = numUpC[i];
+                int num = numUpL[i];
                 flippedDownL = flippedDownL+num;
             }
         }
@@ -120,16 +119,21 @@ public class ShutTheBox
      */
     public void concatUnflipped()
     {
+        String cctNH = new String();
+        String cctNL = new String();
         for(int i = 0; i < numUpH.length; i++){
             if(numUpH[i]!=0){
-                concatNumH = concatNumH+numUpH[i];
+                cctNH = cctNH+numUpH[i];
             }
         }
         for(int i = 0; i < numUpL.length; i++){
             if(numUpL[i]!=0){
-                concatNumL = concatNumL+numUpL[i];
+                cctNL = cctNL+numUpL[i];
             }
         }
+        concatNumH = Integer.parseInt(cctNH);
+        concatNumL = Integer.parseInt(cctNL);
+
     }
 
     /**
@@ -146,14 +150,14 @@ public class ShutTheBox
         }
         if(anyUp==0){continueGame=false;}
 
-        continueGame = sumOfSubset(arrayIn, arrayIn.length, roll);
+        continueGame = subsetSum(arrayIn, arrayIn.length, roll);
     }
 
     /**
      * Tests whether or not the game can continue by testing all elements of the set (in the array)
      * and finding a subset that may add up to the roll, thus allowing the game to continue
      */
-    private boolean sumOfSubset(int numUpIn[], int n, int sum) 
+    private boolean subsetSum(int numUpIn[], int n, int sum) 
     { 
         if(sum==0){
             return true;
@@ -162,23 +166,17 @@ public class ShutTheBox
             return false;
         }
         if(numUpIn[n-1]>sum){
-            return sumOfSubset(numUpIn, n-1, sum);
+            return subsetSum(numUpIn, n-1, sum);
         }
 
-        return sumOfSubset(numUpIn, n-1, sum)||sumOfSubset(numUpIn, n-1, sum-numUpIn[n-1]);
+        return subsetSum(numUpIn, n-1, sum)||subsetSum(numUpIn, n-1, sum-numUpIn[n-1]);
 
     }
 
-    /** for both this and the following algorithm, they need to be able to choose
-     *   more than one number (possibly) OR if it cannot choose more than one number
-     *   than it needs to check when it is not possible for the algorithm to 
-     *   continue because the dice roll is too big to reach
-     */
     /**
      * A method that when run, instead of allowing user input, will try to choose
      * the HIGHEST number possible to fulfill the dice roll requirements
      *
-     * @return an int that represents the highest chosen number
      */
     public void chooseHigh()
     {
@@ -196,7 +194,6 @@ public class ShutTheBox
      * A method that when run, instead of allowing user input, will try to choose
      * the LOWEST number possible to fulfill the dice roll requirements
      *
-     * @return an int that represents the lowest chosen number
      */
     public void chooseLow()
     {
@@ -213,8 +210,9 @@ public class ShutTheBox
     /**
      * Prints out the numUp array so that the user can visualize it
      * 
+     * @param arrayIn an int array representing the current working array
      */
-    public void curNumString(int[] arrayIn)
+    private void arrayString(int[] arrayIn)
     {
         for(int i = 0; i<arrayIn.length-1; i++){
             if(arrayIn[i]!=0){
@@ -225,10 +223,8 @@ public class ShutTheBox
     }
 
     /**
-     * Method that sums up the values for each of the methods of scoring
+     * Method that sums up the values for each of the methods of scoring after running each method of scoring
      *
-     * @param  y  a sample parameter for a method
-     * @return    the sum of x and y
      */
     public void sumOfEverything()
     {
@@ -236,21 +232,13 @@ public class ShutTheBox
         numFlippedDown();
         concatUnflipped();
 
-        int cctNH = Integer.parseInt(concatNumH);
-        int cctNL = Integer.parseInt(concatNumL);
-
         pointsSumH += pointsH;
         flippedDownSumH += flippedDownH;
-        concatNumSumH += cctNH;
+        concatNumSumH += concatNumH;
 
         pointsSumL += pointsL;
         flippedDownSumL += flippedDownL;
-        concatNumSumL += cctNL;
-
-        //run each of the methods each time this is called to sum everything up
-        //may need some instance variables that represent the sums
-        //returns the values to the instance variables
-
+        concatNumSumL += concatNumL;
     }
 
     /**
@@ -260,29 +248,37 @@ public class ShutTheBox
      */
     public void runSimulation()
     {
-        Scanner input = new Scanner(System.in);
+        Scanner input = new Scanner(System.in); // getting user input
         System.out.print("How many simulations? ");
-        int simulations = input.nextInt();
+        int simulations = input.nextInt(); // gathering user input as an int value representing num of games
         for(int games = 0; games < simulations; games++){
             while(continueGame){
-                // curNumString(numUpH);  (DEBUGGING)
                 rollDice();
                 possibilities(numUpH);
-                possibilities(numUpL);
                 chooseHigh();
-                chooseLow();
-                sumOfEverything();
+                
             }
+            while(continueGame){
+                rollDice();
+                possibilities(numUpL);
+                chooseLow();
+                
+            }
+            sumOfEverything();
         }
-
+        input.close();
+        
         System.out.println("Highest Choice");
-        System.out.println("Method 1"+pointsSumH);
-        System.out.println("Method 2 "+flippedDownH);
-        System.out.println("Method 3"+concatNumSumH);
+        System.out.println("**************");
+        System.out.println("Method 1: "+pointsSumH/simulations);
+        System.out.println("Method 2: "+flippedDownH/simulations);
+        System.out.println("Method 3: "+concatNumSumH/simulations);
 
+        System.out.println();
         System.out.println("Lowest Choice");
-        System.out.println("Method 1"+pointsSumL);
-        System.out.println("Method 2 "+flippedDownL);
-        System.out.println("Method 3"+concatNumSumL);
+        System.out.println("*************");
+        System.out.println("Method 1: "+pointsSumL/simulations);
+        System.out.println("Method 2: "+flippedDownL/simulations);
+        System.out.println("Method 3: "+concatNumSumL/simulations);
     }
 }
